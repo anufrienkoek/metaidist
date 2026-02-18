@@ -1,0 +1,5 @@
+{
+  "name": "EduProgram GenAI",
+  "description": "Automated service for educators to generate, edit, and export educational programs using Gemini AI.",
+  "requestFramePermissions": []
+}
