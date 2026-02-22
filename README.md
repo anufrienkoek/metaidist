@@ -18,3 +18,6 @@ View your app in AI Studio: https://ai.studio/apps/09039c99-02ff-4c92-9025-31fee
 2. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_GIGACHAT_AUTH_KEY` in [.env.local](.env.local)
 3. Run the app:
    `npm run dev`
+
+
+> Если OAuth прокси недоступен и вы получили готовый access token, добавьте `VITE_GIGACHAT_ACCESS_TOKEN` в `.env.local` — приложение будет использовать его напрямую.

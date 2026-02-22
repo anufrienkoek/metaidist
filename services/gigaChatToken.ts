@@ -9,6 +9,7 @@ let currentToken: string | null = null;
 let tokenExpiresAt = 0;
 let refreshTimer: number | null = null;
 let tokenPromise: Promise<string> | null = null;
+const staticAccessToken = (import.meta.env.VITE_GIGACHAT_ACCESS_TOKEN as string | undefined)?.trim();
 
 async function fetchToken(): Promise<TokenResp> {
   let authKey = import.meta.env.VITE_GIGACHAT_AUTH_KEY as string | undefined;
@@ -32,6 +33,9 @@ async function fetchToken(): Promise<TokenResp> {
 
   if (!res.ok) {
     const text = await res.text();
+    if (res.status === 404) {
+      throw new Error(`Token fetch failed: 404 - ${text}. Проверьте, что приложение запущено через 'npm run dev' (Vite proxy) или настройте серверный прокси для /gigachat-auth.`);
+    }
     throw new Error(`Token fetch failed: ${res.status} - ${text}`);
   }
 
@@ -63,6 +67,10 @@ function scheduleRefresh(expiresAt: number) {
 }
 
 export async function getToken(): Promise<string> {
+  if (staticAccessToken) {
+    return staticAccessToken;
+  }
+
   if (currentToken && Date.now() < tokenExpiresAt - 5000) {
     return currentToken;
   }
@@ -87,5 +95,8 @@ export async function getToken(): Promise<string> {
 }
 
 export function startTokenAutoRefresh() {
+  if (staticAccessToken) {
+    return;
+  }
   void getToken().catch((err) => console.error('Initial token fetch failed', err));
 }
