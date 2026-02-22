@@ -8,6 +8,20 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/gigachat-auth': {
+            target: 'https://ngw.devices.sberbank.ru:9443',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/gigachat-auth/, ''),
+          },
+          '/gigachat-api': {
+            target: 'https://gigachat.devices.sberbank.ru',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/gigachat-api/, ''),
+          },
+        }
       },
       plugins: [react()],
       define: {
