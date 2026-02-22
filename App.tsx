@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Program, ProgramMetadata, ProgramLevel, ProgramSections, SECTION_LABELS, SectionKey } from './types';
 import { DEFAULT_FORMATTING, LEVEL_OPTIONS, AVAILABLE_MODELS, DEFAULT_MODEL } from './constants';
-import { generateProgramContent } from './services/geminiService';
+import { generateProgramContent } from './services/aiService';
 import { exportToDocx } from './services/docxService';
 import { supabase, isSupabaseConfigured, programService } from './services/supabaseService';
 import Button from './components/Button';
