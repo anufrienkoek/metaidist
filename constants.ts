@@ -34,8 +34,6 @@ export const AVAILABLE_MODELS = [
   { value: 'GigaChat-2', label: 'GigaChat-2 (Быстрая)' },
   { value: 'GigaChat-2-Pro', label: 'GigaChat-2 Pro (Умная)' },
   { value: 'GigaChat-2-Max', label: 'GigaChat-2 Max (Продвинутая)' },
-  { value: 'gemini-3-flash-preview', label: 'Gemini 3.0 Flash (Быстрая)' },
-  { value: 'gemini-3-pro-preview', label: 'Gemini 3.0 Pro (Умная)' },
 ];
 
 export const DEFAULT_MODEL = 'GigaChat-2';
