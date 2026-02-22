@@ -21,3 +21,6 @@ View your app in AI Studio: https://ai.studio/apps/09039c99-02ff-4c92-9025-31fee
 
 
 > Если OAuth прокси недоступен и вы получили готовый access token, добавьте `VITE_GIGACHAT_ACCESS_TOKEN` в `.env.local` — приложение будет использовать его напрямую.
+
+> Если генерация падает с 404 на `/gigachat-api/...`, укажите прямой API base URL в `.env.local`:
+> `VITE_GIGACHAT_API_BASE_URL=https://gigachat.devices.sberbank.ru/api/v1`
