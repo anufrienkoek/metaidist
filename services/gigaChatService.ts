@@ -1,39 +1,44 @@
 import { getToken, startTokenAutoRefresh } from './gigaChatToken';
 
-const API_URL = '/gigachat-api/api/v1';
+const DEFAULT_PROXY_API_URL = '/gigachat-api/api/v1';
+const DIRECT_API_URL = 'https://gigachat.devices.sberbank.ru/api/v1';
+const API_URL = (import.meta.env.VITE_GIGACHAT_API_BASE_URL as string | undefined)?.trim() || DEFAULT_PROXY_API_URL;
 
-// Start auto-refresh when this module is loaded (or called from App)
-// We can export it to call it explicitly in App.tsx as requested, 
-// but calling it here ensures it starts if the service is imported.
-// However, the user asked to call it in App.tsx. I will export it.
+const buildPayload = (model: string, messages: any[]) => ({
+  model,
+  messages,
+  temperature: 0.7,
+  max_tokens: 2000,
+});
+
+async function callGigaChat(urlBase: string, token: string, model: string, messages: any[]) {
+  return fetch(`${urlBase}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(buildPayload(model, messages)),
+  });
+}
 
 export const generateGigaChatCompletion = async (model: string, messages: any[]) => {
-    const token = await getToken();
-    console.log("Using GigaChat Token:", token ? token.substring(0, 10) + "..." : "null");
-    console.log("Model:", model);
+  const token = await getToken();
 
-    const response = await fetch(`${API_URL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            model: model,
-            messages: messages,
-            temperature: 0.7,
-            max_tokens: 2000
-        })
-    });
+  let response = await callGigaChat(API_URL, token, model, messages);
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error("GigaChat API Error:", response.status, errorText);
-        throw new Error(`GigaChat API Failed: ${response.status} - ${errorText}`);
-    }
+  // Fallback for environments without Vite dev proxy (e.g. static preview/prod)
+  if (!response.ok && response.status === 404 && API_URL.startsWith('/')) {
+    response = await callGigaChat(DIRECT_API_URL, token, model, messages);
+  }
 
-    return await response.json();
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`GigaChat API Failed: ${response.status} - ${errorText}`);
+  }
+
+  return response.json();
 };
 
 export { startTokenAutoRefresh };
