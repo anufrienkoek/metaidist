@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.28.0';
 
-const OAUTH_URL = 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth';
+const DEFAULT_OAUTH_URL = 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth';
+const DEFAULT_SCOPE = 'GIGACHAT_API_PERS';
 
 function toIsoTimestamp(expiresAt: unknown): string | null {
   if (typeof expiresAt === 'number') {
@@ -24,9 +25,12 @@ function toIsoTimestamp(expiresAt: unknown): string | null {
   return null;
 }
 
+function fallbackExpiresAt(): string {
+  return new Date(Date.now() + 29 * 60 * 1000).toISOString();
+}
+
 Deno.serve(async (request: Request): Promise<Response> => {
   const reqId = crypto.randomUUID();
-  const startedAt = Date.now();
 
   try {
     if (request.method !== 'POST') {
@@ -39,6 +43,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const basicSecretRaw = Deno.env.get('GIGACHAT_BASIC');
+    const oauthUrl = Deno.env.get('GIGACHAT_OAUTH_URL') || DEFAULT_OAUTH_URL;
 
     if (!supabaseUrl || !serviceRoleKey) {
       throw new Error('SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY are not configured');
@@ -52,9 +57,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
       ? basicSecretRaw
       : `Basic ${basicSecretRaw}`;
 
-    console.info(`[${reqId}] Requesting new GigaChat token`);
-
-    const oauthResp = await fetch(OAUTH_URL, {
+    const oauthResp = await fetch(oauthUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -62,7 +65,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
         RqUID: reqId,
         Authorization: authorization,
       },
-      body: 'scope=GIGACHAT_API_PERS',
+      body: `scope=${encodeURIComponent(DEFAULT_SCOPE)}`,
     });
 
     const rawText = await oauthResp.text();
@@ -87,10 +90,10 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }
 
     const accessToken = typeof rawJson.access_token === 'string' ? rawJson.access_token : null;
-    const expiresAtIso = toIsoTimestamp(rawJson.expires_at);
+    const expiresAtIso = toIsoTimestamp(rawJson.expires_at) ?? fallbackExpiresAt();
 
-    if (!accessToken || !expiresAtIso) {
-      throw new Error('OAuth response missing access_token and/or expires_at');
+    if (!accessToken) {
+      throw new Error('OAuth response missing access_token');
     }
 
     const admin = createClient(supabaseUrl, serviceRoleKey);
@@ -105,11 +108,6 @@ Deno.serve(async (request: Request): Promise<Response> => {
       console.error(`[${reqId}] Failed to persist token`, upsertError);
       throw new Error(`DB upsert failed: ${upsertError.message}`);
     }
-
-    console.info(`[${reqId}] Token refreshed and persisted successfully`, {
-      expires_at: expiresAtIso,
-      duration_ms: Date.now() - startedAt,
-    });
 
     return new Response(
       JSON.stringify({ ok: true, expires_at: expiresAtIso, request_id: reqId }),

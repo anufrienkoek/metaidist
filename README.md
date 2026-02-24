@@ -33,3 +33,21 @@ View your app in AI Studio: https://ai.studio/apps/09039c99-02ff-4c92-9025-31fee
 - Совместимость: если у вас уже заведены `VITE_GIGACHAT_AUTH_KEY` / `VITE_GIGACHAT_ACCESS_TOKEN`, serverless proxy тоже их прочитает.
 
 Не задавайте `VITE_GIGACHAT_API_BASE_URL` в проде, иначе фронтенд попробует ходить в GigaChat напрямую и упрётся в CORS.
+
+
+## Supabase Edge Functions для GigaChat
+
+Добавлены две функции:
+- `functions/refresh-gigachat-token/index.ts` — получает access token через OAuth и сохраняет в `public.gigachat_tokens` через RPC `upsert_gigachat_token`.
+- `functions/proxy-gigachat-chat/index.ts` — проксирует запросы на GigaChat API, автоматически подставляя актуальный `Authorization: Bearer <access_token>`.
+
+Примеры:
+```bash
+# refresh
+curl -X POST https://<PROJECT_REF>.functions.supabase.co/refresh-gigachat-token
+
+# proxy
+curl -X POST https://<PROJECT_REF>.functions.supabase.co/proxy-gigachat-chat/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"input":"hello"}'
+```
