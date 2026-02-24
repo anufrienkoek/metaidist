@@ -47,7 +47,7 @@ const TermsOfReferenceModal: React.FC<TermsOfReferenceModalProps> = ({ isOpen, o
                     {[
                         'Авторизация пользователей (преподавателей/методистов).',
                         'Создание, редактирование и удаление карточек программ.',
-                        'Генерация содержания разделов программы с использованием ИИ (Gemini).',
+                        'Генерация содержания разделов программы с использованием ИИ (GigaChat).',
                         'Поддержка структуры: Титульный лист, Пояснительная записка, Цели, Задачи, Результаты, Учебный план, Оценка, Литература.',
                         'Ручное редактирование сгенерированного текста.',
                         'Настройка форматирования (шрифты, отступы, размеры) для печати.',
@@ -80,7 +80,7 @@ const TermsOfReferenceModal: React.FC<TermsOfReferenceModalProps> = ({ isOpen, o
                     <div className="border border-gray-200 rounded-lg p-4">
                         <h4 className="font-semibold text-gray-900 mb-2">Integrations & Libs</h4>
                         <ul className="list-disc list-inside text-sm space-y-1 text-gray-600">
-                            <li>Google GenAI SDK (Gemini Models)</li>
+                            <li>GigaChat API</li>
                             <li>docx (Document generation)</li>
                             <li>file-saver (Client-side download)</li>
                         </ul>
@@ -106,7 +106,7 @@ const TermsOfReferenceModal: React.FC<TermsOfReferenceModalProps> = ({ isOpen, o
                         </li>
                         <li className="flex items-start gap-2">
                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-                            <span><strong>AI Gateway:</strong> Безопасное проксирование запросов к Gemini API, валидация ответов.</span>
+                            <span><strong>AI Gateway:</strong> Безопасное проксирование запросов к GigaChat API, валидация ответов.</span>
                         </li>
                     </ul>
                     <p className="mt-3 text-xs text-gray-400 italic">Подробности см. в файле BACKEND_ARCHITECTURE.md</p>
