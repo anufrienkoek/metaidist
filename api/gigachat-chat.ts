@@ -10,19 +10,21 @@ type ChatPayload = {
   max_tokens?: number;
 };
 
-const setCors = (res: VercelResponse) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+const setCors = (req: VercelRequest, res: VercelResponse) => {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 };
 
 const getAccessToken = async (): Promise<string> => {
-  const staticToken = process.env.GIGACHAT_ACCESS_TOKEN?.trim();
+  const staticToken = (process.env.GIGACHAT_ACCESS_TOKEN || process.env.VITE_GIGACHAT_ACCESS_TOKEN || '').trim();
   if (staticToken) return staticToken;
 
-  const basic = process.env.GIGACHAT_BASIC?.trim();
+  const basic = (process.env.GIGACHAT_BASIC || process.env.VITE_GIGACHAT_AUTH_KEY || '').trim();
   if (!basic) {
-    throw new Error('Server secret GIGACHAT_BASIC is not configured');
+    throw new Error('Server secret is not configured. Set GIGACHAT_BASIC or GIGACHAT_ACCESS_TOKEN in Vercel env.');
   }
 
   const authHeader = basic.startsWith('Basic ') ? basic : `Basic ${basic}`;
@@ -52,7 +54,7 @@ const getAccessToken = async (): Promise<string> => {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  setCors(res);
+  setCors(req, res);
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();

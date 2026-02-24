@@ -30,5 +30,6 @@ View your app in AI Studio: https://ai.studio/apps/09039c99-02ff-4c92-9025-31fee
 
 Нужно задать секреты в Vercel Project Settings → Environment Variables:
 - `GIGACHAT_BASIC` (или `GIGACHAT_ACCESS_TOKEN`)
+- Совместимость: если у вас уже заведены `VITE_GIGACHAT_AUTH_KEY` / `VITE_GIGACHAT_ACCESS_TOKEN`, serverless proxy тоже их прочитает.
 
 Не задавайте `VITE_GIGACHAT_API_BASE_URL` в проде, иначе фронтенд попробует ходить в GigaChat напрямую и упрётся в CORS.
